@@ -12,3 +12,6 @@ data/cps_*.xml
 data/analysis_ready.parquet
 data/cps_analysis_ready.parquet
 .DS_Store
+
+# Local Netlify folder
+.netlify
