@@ -1,0 +1,31 @@
+years: [2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2021, 2022, 2023, 2024]  # no 2020 (experimental)
+
+variables:
+  - AGE
+  - SCHOOL
+  - EMPSTAT
+  - DEGFIELD
+  - OCC2010
+  - PERWT
+
+field_codes:
+  Computer Science: [21]
+  Engineering: [24]
+  Mathematics: [37]
+  Business: [61]
+  Humanities: [33, 34, 48, 62]  # English, Liberal Arts, Philosophy, History
+
+age_buckets:
+  - {label: "22-27 (young)",        min: 22, max: 27}
+  - {label: "28-34 (early career)", min: 28, max: 34}
+  - {label: "35-50 (established)",  min: 35, max: 50}
+
+min_n: 50  # drop cells with fewer unweighted observations
+
+# OCC2010 ranges counted as software/engineering roles
+tech_occ_ranges:
+  - [1000, 1107]   # CS and software
+  - [1300, 1530]   # engineering
+
+bubble_years: [2022, 2024]
+tech_occ_years: [2022, 2023, 2024]

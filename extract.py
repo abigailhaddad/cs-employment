@@ -5,46 +5,24 @@ from pathlib import Path
 import pandas as pd
 from ipumspy import IpumsApiClient, MicrodataExtract, readers
 
-API_KEY = os.environ.get("IPUMS_API_KEY") or (
-    next(
-        (v.split("=", 1)[1].strip() for v in
-         (Path(__file__).parent / ".env").read_text().splitlines()
-         if v.startswith("IPUMS_API_KEY=")),
-        None
-    ) if (Path(__file__).parent / ".env").exists() else None
-)
-if not API_KEY:
+from config import SAMPLES, VARIABLES, FIELD_CODES, AGE_BUCKETS
+
+def _api_key() -> str:
+    if key := os.environ.get("IPUMS_API_KEY"):
+        return key
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if line.startswith("IPUMS_API_KEY="):
+                return line.split("=", 1)[1].strip()
     raise RuntimeError("IPUMS_API_KEY not set")
 
 DATA_DIR = Path(__file__).parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
-YEARS   = list(range(2009, 2020)) + [2021, 2022, 2023, 2024]  # no 2020 (experimental)
-SAMPLES = [f"us{y}a" for y in YEARS]
-
-VARIABLES = [
-    "AGE", "SCHOOL", "EMPSTAT", "EDUC", "DEGFIELD",
-    "OCC", "OCC2010", "IND", "IND1990",
-    "INCWAGE", "UHRSWORK", "PERWT",
-]
-
-FIELD_CODES = {
-    "Computer Science": [21],
-    "Engineering":      [24],
-    "Mathematics":      [37],
-    "Business":         [61],
-    "Humanities":       [33, 34, 48, 62],
-}
-
-AGE_BUCKETS = [
-    ("22-27 (young)",       22, 27),
-    ("28-34 (early career)", 28, 34),
-    ("35-50 (established)", 35, 50),
-]
-
 
 def download_extract():
-    client  = IpumsApiClient(API_KEY)
+    client  = IpumsApiClient(_api_key())
     extract = MicrodataExtract(
         collection="usa",
         description="CS grad employment 2009-2024",
@@ -67,10 +45,11 @@ def download_extract():
 
 def load_and_filter(ddi_path: Path) -> pd.DataFrame:
     ddi = readers.read_ipums_ddi(ddi_path)
-    dat = next(iter(DATA_DIR.glob(f"{ddi_path.stem}.dat*")))
+    dat = next(DATA_DIR.glob(f"{ddi_path.stem}.dat*"))
 
+    needed = ["YEAR", "AGE", "SCHOOL", "DEGFIELD", "EMPSTAT", "OCC2010", "PERWT"]
     chunks = []
-    for chunk in readers.read_microdata_chunked(ddi, dat, chunksize=500_000):
+    for chunk in readers.read_microdata_chunked(ddi, dat, chunksize=1_000_000, subset=needed):
         chunk = chunk[
             chunk["AGE"].between(22, 50)
             & (chunk["SCHOOL"] == 1)
