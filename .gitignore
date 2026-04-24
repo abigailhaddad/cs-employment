@@ -1,0 +1,14 @@
+# Python environment
+myenv/
+__pycache__/
+*.pyc
+.env
+
+# IPUMS raw data files (large binary/text, re-downloadable)
+data/usa_*.dat*
+data/usa_*.xml
+data/cps_*.dat*
+data/cps_*.xml
+data/analysis_ready.parquet
+data/cps_analysis_ready.parquet
+.DS_Store

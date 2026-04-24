@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Actually Changed for CS Grads</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+    <script src="https://unpkg.com/intersection-observer@0.12.2/intersection-observer.js"></script>
+    <style>
+        :root {
+            --bg:      #FFF8F0;
+            --surface: #F5EDE0;
+            --text:    #3D2B1F;
+            --muted:   #7A6E62;
+            --accent:  #2D6A4F;
+            --gold:    #D4A03C;
+            --border:  #E8DDD0;
+            --dark:    #2A211A;
+            --err:     #C0392B;
+            --cs:    #7B68A6;
+            --eng:   #C75B5B;
+            --math:  #5B9BD5;
+            --biz:   #E8A33D;
+            --hum:   #70AD47;
+            --fhead: 'DM Sans', sans-serif;
+            --fbody: 'Source Sans 3', sans-serif;
+            --fmono: 'JetBrains Mono', monospace;
+            --tw: 720px;
+            --lw: 1100px;
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:var(--fbody);color:var(--text);background:var(--bg);line-height:1.7;font-size:1.0625rem;overflow-x:hidden}
+        h1,h2,h3{font-family:var(--fhead);letter-spacing:-.01em}
+        h1{font-size:2.5rem;font-weight:700;line-height:1.2}
+        h2{font-size:1.75rem;font-weight:600;line-height:1.3}
+        h3{font-size:1.15rem;font-weight:600}
+        strong{font-weight:600} em{font-style:italic}
+
+        .term{position:relative;border-bottom:1.5px dotted var(--accent);cursor:help}
+        .term .tip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--dark);color:#F5EDE0;padding:.5rem .75rem;border-radius:.375rem;font-size:.8rem;line-height:1.5;width:max-content;max-width:300px;white-space:normal;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:100;pointer-events:none}
+        .term .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--dark)}
+        .term:hover .tip{display:block}
+
+        .hero{max-width:var(--tw);margin:0 auto;padding:4rem 1.5rem 2rem}
+        .hero h1{margin-bottom:1.25rem}
+        .hero .sub{font-size:1.2rem;color:var(--muted);line-height:1.6;max-width:600px}
+        .hero .meta{margin-top:1.75rem;font-size:.875rem;color:var(--muted)}
+
+        .divider{background:var(--accent);padding:2.5rem 1.5rem;text-align:center;margin:1rem 0}
+        .divider h2{color:var(--bg);font-size:1.875rem;max-width:var(--tw);margin:0 auto}
+        .divider p{color:rgba(255,248,240,.8);max-width:var(--tw);margin:.625rem auto 0;font-size:1.05rem}
+        .divider.dark{background:var(--dark)}
+
+        .sc{position:relative;display:flex;max-width:var(--lw);margin:0 auto;padding:0 1.5rem}
+        .sg{position:sticky;top:0;width:55%;height:80vh;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .sg .inner{width:100%}
+        .ss{width:45%;padding:0 0 0 2rem}
+        .step{min-height:15vh;display:flex;align-items:center;padding:.5rem 0}
+        .sc-box{background:var(--bg);padding:1.5rem;border-radius:.5rem;border:1px solid var(--border);opacity:.15;transition:opacity .4s,border-color .4s}
+        .step.is-active .sc-box{opacity:1;border-color:var(--gold)}
+        .sc-box p{margin-bottom:.75rem} .sc-box p:last-child{margin-bottom:0}
+
+        .fw{max-width:var(--tw);margin:0 auto;padding:0 1.5rem}
+        .fw .step{min-height:auto;padding:1rem 0}
+        .fw .sc-box{background:transparent;border:none;padding:0;opacity:.15;transition:opacity .5s}
+        .fw .step.is-active .sc-box{opacity:1}
+        #s-close .step:last-child{margin-bottom:50vh}
+
+        .ct{font-family:var(--fhead);font-weight:600;font-size:.85rem;color:var(--muted);margin-bottom:.35rem}
+        .cs{font-size:.72rem;color:var(--muted);margin-top:.35rem;font-style:italic}
+
+        .leg{display:flex;flex-wrap:wrap;gap:.3rem .8rem;margin-top:.6rem;font-size:.78rem}
+        .li{display:flex;align-items:center;gap:.3rem}
+        .ls{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+        .ls.line{border-radius:0;height:3px;width:16px}
+
+        .bn{font-family:var(--fhead);font-weight:700;font-size:2.75rem;line-height:1.1}
+        .bn.gold{color:var(--gold)} .bn.green{color:var(--accent)} .bn.red{color:var(--err)} .bn.purple{color:var(--cs)}
+
+        .sp{height:15vh} .sp-sm{height:8vh}
+
+        footer{max-width:var(--tw);margin:0 auto;padding:3rem 1.5rem 4rem;text-align:center;color:var(--muted);font-size:.875rem;border-top:1px solid var(--border)}
+        footer a{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(45,106,79,.3);text-underline-offset:2px}
+        footer a:hover{text-decoration-color:var(--accent)}
+
+        @media(max-width:768px){
+            .sc{flex-direction:column}
+            .sg{position:relative;width:100%;height:auto;min-height:45vh;padding:1.5rem 0}
+            .ss{width:100%;padding:0}
+            .step{min-height:25vh}
+            h1{font-size:2rem}
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>Young CS grads were already getting hit by 2024</h1>
+    <p class="meta">American Community Survey via IPUMS, 2009–2024 &nbsp;·&nbsp; Ages 22–27, bachelor's degree holders, not enrolled in school</p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1: The unemployment spike
+     ══════════════════════════════════════════════════════════ -->
+<div class="divider">
+    <h2>Unemployment nearly doubled from its 2022 low</h2>
+    <p>CS grads, age 22–27</p>
+</div>
+
+<div class="sc" id="s-unemp">
+    <div class="sg"><div class="inner">
+        <div class="ct">Unemployment rate, CS grads age 22–27</div>
+        <svg id="unemp-svg"></svg>
+        <div class="cs">Source: ACS via IPUMS USA. Unemployed = has no job and is actively looking.</div>
+    </div></div>
+    <div class="ss">
+        <div class="step" data-step="u1"><div class="sc-box">
+            <p>Unemployment among young CS grads bottomed at <strong class="bn purple" style="font-size:2rem">3.7%</strong> in 2022 — the lowest in our 15-year window.</p>
+        </div></div>
+        <div class="step" data-step="u2"><div class="sc-box">
+            <p>By 2024 it had risen to <strong class="bn red" style="font-size:2rem">6.4%</strong> — nearly double the 2022 low, and the highest since 2010.</p>
+        </div></div>
+        <div class="step" data-step="u3"><div class="sc-box">
+            <p>One explanation for the elevated unemployment rate: the share of CS grads not in the labor force (dashed line) has declined.</p>
+        </div></div>
+        <div class="step" data-step="u4"><div class="sc-box">
+            <p>Unemployment can rise two ways: more people looking and not finding work, or fewer people dropping out of the labor force entirely. The NILF share did fall sharply — from 10.6% in 2013 to 5% by 2022. But that decline happened in the decade <em>before</em> the spike we're looking at.</p>
+        </div></div>
+        <div class="step" data-step="u5"><div class="sc-box">
+            <p>But between 2022 and 2024 the not-in-labor-force rate barely moved: 5.0% to 4.8%. The unemployment spike isn't a story of more people entering the labor force — the employed share fell by almost exactly as much as unemployment rose.</p>
+        </div></div>
+    </div>
+</div>
+
+<div class="sp-sm"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2: Field bubble chart
+     ══════════════════════════════════════════════════════════ -->
+<div class="divider">
+    <h2>The Humanities didn't get hit</h2>
+    <p>Unemployment rate by field, 2022 vs. 2024, with share of grads working in software and engineering roles</p>
+</div>
+
+<div class="sc" id="s-bubble">
+    <div class="sg"><div class="inner">
+        <div class="ct">Unemployment rate by field, age 22–27</div>
+        <svg id="bubble-svg"></svg>
+        <div class="leg">
+            <div class="li"><div class="ls" style="background:var(--cs);opacity:.5"></div><span>2022</span></div>
+            <div class="li"><div class="ls" style="background:var(--cs)"></div><span>2024</span></div>
+        </div>
+        <div class="cs">Bubble size = number of degree holders. Tech occ bar = % employed in software and engineering roles (2022–24). Source: ACS via IPUMS USA.</div>
+    </div></div>
+    <div class="ss">
+        <div class="step" data-step="b1"><div class="sc-box">
+            <p>Each field gets a dot for 2022 (faded) and 2024 (solid). Dot size shows how many people hold that degree — Humanities is by far the biggest, Mathematics the smallest.</p>
+            <p>In 2022, unemployment ranged from 1.7% (Business) to 3.7% (CS).</p>
+        </div></div>
+        <div class="step" data-step="b2"><div class="sc-box">
+            <p>By 2024, CS moved from 3.7% to 6.4% — the biggest jump of any field. Engineering moved from 2.2% to 4.1%. Mathematics from 3.2% to 5.5%.</p>
+        </div></div>
+        <div class="step" data-step="b3"><div class="sc-box">
+            <p>Humanities: 3.2% to 3.8%. Business: 1.7% to 2.8%.</p>
+        </div></div>
+        <div class="step" data-step="b4"><div class="sc-box">
+            <p>63% of employed CS grads and 60% of Engineering grads work in
+            <span class="term">software and engineering roles<span class="tip">Software developers, computer systems analysts, information security analysts, computer programmers, web developers, network admins, and related roles (OCC2010 1000–1107); plus aerospace, electrical, mechanical, civil, and other engineering roles (OCC2010 1300–1530).</span></span>.
+            For Humanities grads that number is 6%.</p>
+        </div></div>
+    </div>
+</div>
+
+<div class="sp-sm"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3: Age stratification
+     ══════════════════════════════════════════════════════════ -->
+<div class="divider">
+    <h2>Within CS, junior workers took the hardest hit</h2>
+    <p>Unemployment rate by career stage, 2009–2024</p>
+</div>
+
+<div class="sc" id="s-age">
+    <div class="sg"><div class="inner">
+        <div class="ct">CS unemployment rate by age group</div>
+        <svg id="age-svg"></svg>
+        <div class="leg">
+            <div class="li"><div class="ls line" style="background:#3D2B6E"></div><span>Age 22–27</span></div>
+            <div class="li"><div class="ls line" style="background:#9B8EC4"></div><span>Age 28–34</span></div>
+            <div class="li"><div class="ls line" style="background:#C4BAE0"></div><span>Age 35–50</span></div>
+        </div>
+        <div class="cs">Source: ACS via IPUMS USA.</div>
+    </div></div>
+    <div class="ss">
+        <div class="step" data-step="a0"><div class="sc-box">
+            <p>During the 2008–10 financial crisis, young CS workers' unemployment spiked from 5.1% to 7.0%. Mid-career and established workers barely moved.</p>
+        </div></div>
+        <div class="step" data-step="a1"><div class="sc-box">
+            <p>COVID (2019–21) barely touched young CS workers — their unemployment actually fell slightly. It nudged up modestly for mid-career and established workers.</p>
+        </div></div>
+        <div class="step" data-step="a1b"><div class="sc-box">
+            <p>2022–24 is different. All three groups rose — but young workers rose the most.</p>
+        </div></div>
+        <div class="step" data-step="a2"><div class="sc-box">
+            <p>From the 2022 low to 2024:</p>
+            <p><strong>Ages 22–27:</strong> 3.7% → 6.4% &nbsp;<span style="color:var(--err)">+2.7pp</span><br>
+               <strong>Ages 28–34:</strong> 2.8% → 4.3% &nbsp;<span style="color:var(--gold)">+1.5pp</span><br>
+               <strong>Ages 35–50:</strong> 1.7% → 2.7% &nbsp;<span style="color:var(--accent)">+1.0pp</span></p>
+        </div></div>
+    </div>
+</div>
+
+
+<footer>
+    <p>Data: <a href="https://usa.ipums.org/usa/">IPUMS USA</a>, American Community Survey 2009–2024</p>
+    <p style="margin-top:.75rem">Built by <a href="https://abigailhaddad.netlify.app">Abigail Haddad</a></p>
+</footer>
+<div class="sp"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ─── DATA — loaded from JSON files generated by export_web_data.py ───
+var CS_LINES, BUBBLE_2022, BUBBLE_2024, TECH_OCC_PCT, CS_YOUNG, CS_MID, CS_EST;
+
+var FC = {"Computer Science":"#7B68A6","Engineering":"#C75B5B","Mathematics":"#5B9BD5","Business":"#E8A33D","Humanities":"#70AD47"};
+var M = {t:20,r:28,b:36,l:48};
+
+// ─── HELPERS ──────────────────────────────────────────────────────────
+function cw(id){ var el=document.getElementById(id); return el ? (el.parentElement.offsetWidth||460) : 460; }
+function ch(w){ return Math.min(w*0.58, 290); }
+function ax(g){ g.selectAll('text').style('font-size','.71rem').style('font-family',"'Source Sans 3',sans-serif").style('fill','#7A6E62'); g.selectAll('line,path').style('stroke','#E8DDD0'); }
+function yLine(g,y,x2,val,label,color){
+    g.append('line').attr('x1',0).attr('x2',x2).attr('y1',y(val)).attr('y2',y(val)).attr('stroke',color||'#E8DDD0').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+    if(label) g.append('text').attr('x',x2+3).attr('y',y(val)+4).text(label).style('font-size','.68rem').style('fill',color||'#7A6E62').style('font-family',"'Source Sans 3',sans-serif");
+}
+
+// ─── CHART 1b: Change bars 2022→2024 (step u5) ────────────────────────
+function drawStatusBars(){
+    // Show changes only — all on the same scale, no confusion
+    var rows = [
+        {label:'Employed',           from:91.4, to:88.8, change:-2.6, c:'#2D6A4F'},
+        {label:'Unemployed',         from:3.7,  to:6.4,  change:+2.7, c:'#C0392B'},
+        {label:'Not in labor force', from:5.0,  to:4.8,  change:-0.2, c:'#7A6E62'}
+    ];
+    var LABEL_W=148, W=cw('unemp-svg'), H=ch(W);
+    var iW=W-LABEL_W-M.r-110, iH=H-M.t-M.b;
+    var svg=d3.select('#unemp-svg').attr('width',W).attr('height',H);
+    svg.selectAll('*').remove();
+
+    var y=d3.scaleBand().domain(rows.map(function(r){return r.label;})).range([0,iH]).padding(0.45);
+    // centered on zero, range covers ±3
+    var x=d3.scaleLinear().domain([-3,3]).range([0,iW]);
+    var mid=x(0);
+
+    var g=svg.append('g').attr('transform','translate('+LABEL_W+','+M.t+')');
+
+    // zero line
+    g.append('line').attr('x1',mid).attr('x2',mid).attr('y1',0).attr('y2',iH)
+     .attr('stroke','#E8DDD0').attr('stroke-width',1.5);
+    g.append('text').attr('x',mid).attr('y',-8).attr('text-anchor','middle')
+     .text('change in percentage points, 2022→2024')
+     .style('font-size','.65rem').style('fill','#7A6E62').style('font-family',"'Source Sans 3',sans-serif");
+
+    rows.forEach(function(row){
+        var cy=y(row.label)+y.bandwidth()/2;
+        var bh=y.bandwidth()*0.65;
+        var x1=row.change<0?x(row.change):mid;
+        var x2=row.change>0?x(row.change):mid;
+
+        // bar
+        g.append('rect').attr('x',x1).attr('y',cy-bh/2).attr('width',x2-x1).attr('height',bh)
+         .attr('fill',row.c).attr('opacity',0.8).attr('rx',2);
+
+        // value label — always right of zero line to avoid collision with row labels
+        var sign=row.change>0?'+':'';
+        var lx=x(3)+4; // right edge, consistent position
+        g.append('text').attr('x',lx).attr('y',cy-5).attr('dy','.35em').attr('text-anchor','start')
+         .text(sign+row.change+'pp')
+         .style('font-size','.72rem').style('fill',row.c).style('font-weight','700')
+         .style('font-family',"'DM Sans',sans-serif");
+        g.append('text').attr('x',lx).attr('y',cy+10).attr('dy','.35em').attr('text-anchor','start')
+         .text(row.from+'%→'+row.to+'%')
+         .style('font-size','.62rem').style('fill',row.c).style('opacity',0.8)
+         .style('font-family',"'Source Sans 3',sans-serif");
+
+        // row label
+        svg.append('text').attr('x',LABEL_W-8).attr('y',M.t+cy).attr('text-anchor','end').attr('dy','.35em')
+         .text(row.label).style('font-size','.78rem').style('fill',row.c).style('font-weight','600')
+         .style('font-family',"'DM Sans',sans-serif");
+    });
+}
+
+// ─── CHART 1: unemployment line (+ optional NILF) ─────────────────────
+function drawUnemp(highlight){
+    var showNILF = highlight==='nilf-peak'||highlight==='nilf-drop'||highlight==='nilf-flat';
+    var W=cw('unemp-svg'), H=ch(W), iW=W-M.l-M.r, iH=H-M.t-M.b;
+    var svg=d3.select('#unemp-svg').attr('width',W).attr('height',H);
+    svg.selectAll('*').remove();
+    var g=svg.append('g').attr('transform','translate('+M.l+','+M.t+')');
+
+    var x=d3.scaleLinear().domain([2009,2024]).range([0,iW]);
+    var y=d3.scaleLinear().domain([0,12]).range([iH,0]);
+
+    // suppress gridline text labels during NILF annotation steps to avoid overlap
+    var glLabel = showNILF ? null : '5%';
+    var glLabel10 = showNILF ? null : '10%';
+    yLine(g,y,iW,5,glLabel,null);
+    yLine(g,y,iW,10,glLabel10,null);
+
+    // NILF line — shown on steps u3/u4/u5
+    if(showNILF){
+        var lineN=d3.line().x(function(d){return x(d.y);}).y(function(d){return y(d.n);}).curve(d3.curveMonotoneX);
+        g.append('path').datum(CS_LINES).attr('fill','none').attr('stroke','#7A6E62')
+         .attr('stroke-width',1.5).attr('stroke-dasharray','5,3').attr('d',lineN);
+
+        if(highlight==='nilf-peak'){
+            // annotate 2013 high
+            var d13=CS_LINES.find(function(d){return d.y===2013;});
+            g.append('circle').attr('cx',x(2013)).attr('cy',y(d13.n)).attr('r',5).attr('fill','#7A6E62');
+            g.append('text').attr('x',x(2013)+6).attr('y',y(d13.n)-2)
+             .text('10.6% (2013)').style('font-size','.68rem').style('fill','#7A6E62')
+             .style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+        }
+        if(highlight==='nilf-drop'){
+            var d13b=CS_LINES.find(function(d){return d.y===2013;});
+            var d22b=CS_LINES.find(function(d){return d.y===2022;});
+            g.append('circle').attr('cx',x(2013)).attr('cy',y(d13b.n)).attr('r',4).attr('fill','#7A6E62');
+            g.append('circle').attr('cx',x(2022)).attr('cy',y(d22b.n)).attr('r',4).attr('fill','#7A6E62');
+            g.append('text').attr('x',x(2013)+6).attr('y',y(d13b.n)-2)
+             .text('10.6%').style('font-size','.68rem').style('fill','#7A6E62').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+            // no label at 2022 — the gridline at 5% makes the level clear
+        }
+        if(highlight==='nilf-flat'){
+            var d22c=CS_LINES.find(function(d){return d.y===2022;});
+            var d24c=CS_LINES.find(function(d){return d.y===2024;});
+            // NILF: just show 2024 endpoint — values are so close (5.0→4.8) that labeling both crowds
+            g.append('circle').attr('cx',x(2024)).attr('cy',y(d24c.n)).attr('r',4).attr('fill','#7A6E62');
+            g.append('text').attr('x',x(2024)+6).attr('y',y(d24c.n)+4)
+             .text('4.8%').style('font-size','.68rem').style('fill','#7A6E62').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+            // unemployment: both endpoints
+            g.append('circle').attr('cx',x(2022)).attr('cy',y(d22c.u)).attr('r',4).attr('fill','#C0392B');
+            g.append('circle').attr('cx',x(2024)).attr('cy',y(d24c.u)).attr('r',4).attr('fill','#C0392B');
+            g.append('text').attr('x',x(2022)-4).attr('y',y(d22c.u)-4)
+             .attr('text-anchor','end').text('3.7%').style('font-size','.68rem').style('fill','#C0392B').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+            g.append('text').attr('x',x(2024)+6).attr('y',y(d24c.u)-4)
+             .text('6.4%').style('font-size','.68rem').style('fill','#C0392B').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+        }
+    }
+
+    // Red unemployment line — faded when NILF is the focus (u3, u4), full when comparing (u5) or other steps
+    var redOpacity = (highlight==='nilf-peak'||highlight==='nilf-drop') ? 0.2 : 1;
+    var line=d3.line().x(function(d){return x(d.y);}).y(function(d){return y(d.u);}).curve(d3.curveMonotoneX);
+    g.append('path').datum(CS_LINES).attr('fill','none').attr('stroke','#C0392B').attr('stroke-width',2.5).attr('opacity',redOpacity).attr('d',line);
+
+    if(highlight==='peak'){
+        var d22=CS_LINES.find(function(d){return d.y===2022;});
+        g.append('circle').attr('cx',x(2022)).attr('cy',y(d22.u)).attr('r',5).attr('fill','#D4A03C');
+        g.append('text').attr('x',x(2022)+7).attr('y',y(d22.u)+4).text('3.7% — record low').style('font-size','.68rem').style('fill','#D4A03C').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+    }
+    if(highlight==='spike'){
+        var d24=CS_LINES.find(function(d){return d.y===2024;});
+        g.append('circle').attr('cx',x(2024)).attr('cy',y(d24.u)).attr('r',5).attr('fill','#C0392B');
+        g.append('text').attr('x',x(2024)-68).attr('y',y(d24.u)-8).text('6.4% — 14-yr high').style('font-size','.68rem').style('fill','#C0392B').style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+    }
+
+    g.append('g').attr('transform','translate(0,'+iH+')').call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(6)).call(ax);
+    g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(function(d){return d+'%';})).call(ax);
+}
+
+// ─── CHART 2a: Dumbbell — unemployment by field ───────────────────────
+var TECH_OCC_PCT = {"Computer Science":62.6,"Engineering":59.9,"Mathematics":19.1,"Humanities":6.2,"Business":1.7};
+
+function drawBubble(step){
+    var LABEL_W = 120;
+    var W=cw('bubble-svg'), H=ch(W)+20, dumbW=W-LABEL_W-M.r, iH=H-M.t-M.b;
+    var svg=d3.select('#bubble-svg').attr('width',W).attr('height',H);
+    svg.selectAll('*').remove();
+
+    var fields=['Humanities','Business','Engineering','Mathematics','Computer Science'];
+    var y=d3.scaleBand().domain(fields).range([0,iH]).padding(0.4);
+    var r=d3.scaleSqrt().domain([0,1600000]).range([0,18]);
+
+    // field labels
+    var gL=svg.append('g').attr('transform','translate(0,'+M.t+')');
+    fields.forEach(function(f){
+        gL.append('text').attr('x',LABEL_W-6).attr('y',y(f)+y.bandwidth()/2)
+         .attr('text-anchor','end').attr('dy','.35em').text(f)
+         .style('font-size','.78rem').style('fill',FC[f]).style('font-weight','600')
+         .style('font-family',"'DM Sans',sans-serif");
+    });
+
+    var gD=svg.append('g').attr('transform','translate('+LABEL_W+','+M.t+')');
+    var x=d3.scaleLinear().domain([0,8]).range([0,dumbW]);
+
+    gD.append('text').attr('x',dumbW/2).attr('y',-6).attr('text-anchor','middle')
+     .text('Unemployment rate').style('font-size','.65rem').style('fill','#7A6E62')
+     .style('font-family',"'Source Sans 3',sans-serif");
+
+    [2,4,6].forEach(function(v){
+        gD.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',0).attr('y2',iH)
+         .attr('stroke','#E8DDD0').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+    });
+
+    var show24=step==='b2'||step==='b3';
+    var dimCS=step==='b3'; // dim non-CS on b3
+
+    fields.forEach(function(f){
+        var d22=BUBBLE_2022.find(function(d){return d.field===f;});
+        var d24=BUBBLE_2024.find(function(d){return d.field===f;});
+        var cy=y(f)+y.bandwidth()/2;
+        var dimmed=dimCS&&f!=='Computer Science';
+
+        if(show24){
+            gD.append('line').attr('x1',x(d22.unemp)).attr('x2',x(d24.unemp))
+             .attr('y1',cy).attr('y2',cy).attr('stroke',FC[f]).attr('stroke-width',2)
+             .attr('opacity',dimmed?0.12:0.6);
+        }
+        gD.append('circle').attr('cx',x(d22.unemp)).attr('cy',cy).attr('r',r(d22.n))
+         .attr('fill',FC[f]).attr('opacity',dimmed?0.05:0.25).attr('stroke',FC[f]).attr('stroke-width',1);
+        gD.append('text').attr('x',x(d22.unemp)).attr('y',cy).attr('text-anchor','middle')
+         .attr('dy','.35em').text(d22.unemp+'%').style('font-size','.62rem')
+         .style('fill',dimmed?'#ccc':FC[f]).style('font-family',"'DM Sans',sans-serif");
+
+        if(show24){
+            gD.append('circle').attr('cx',x(d24.unemp)).attr('cy',cy).attr('r',r(d24.n))
+             .attr('fill',FC[f]).attr('opacity',dimmed?0.08:0.85).attr('stroke',FC[f]).attr('stroke-width',1.5);
+            gD.append('text').attr('x',x(d24.unemp)).attr('y',cy).attr('text-anchor','middle')
+             .attr('dy','.35em').text(d24.unemp+'%').style('font-size','.62rem')
+             .style('fill',dimmed?'#bbb':'white').style('font-weight','700')
+             .style('font-family',"'DM Sans',sans-serif");
+        }
+    });
+
+    gD.append('g').attr('transform','translate(0,'+iH+')')
+     .call(d3.axisBottom(x).ticks(5).tickFormat(function(d){return d+'%';})).call(ax);
+}
+
+// ─── CHART 2b: Tech occupation bars (shown on step b4) ───────────────
+function drawTechBars(){
+    var LABEL_W=120;
+    var W=cw('bubble-svg'), H=ch(W)+20, barW=W-LABEL_W-M.r-40, iH=H-M.t-M.b;
+    var svg=d3.select('#bubble-svg').attr('width',W).attr('height',H);
+    svg.selectAll('*').remove();
+
+    var fields=['Humanities','Business','Mathematics','Engineering','Computer Science'];
+    var y=d3.scaleBand().domain(fields).range([0,iH]).padding(0.35);
+    var x=d3.scaleLinear().domain([0,70]).range([0,barW]);
+
+    // field labels
+    var gL=svg.append('g').attr('transform','translate(0,'+M.t+')');
+    fields.forEach(function(f){
+        gL.append('text').attr('x',LABEL_W-6).attr('y',y(f)+y.bandwidth()/2)
+         .attr('text-anchor','end').attr('dy','.35em').text(f)
+         .style('font-size','.78rem').style('fill',FC[f]).style('font-weight','600')
+         .style('font-family',"'DM Sans',sans-serif");
+    });
+
+    var gB=svg.append('g').attr('transform','translate('+LABEL_W+','+M.t+')');
+
+    gB.append('text').attr('x',0).attr('y',-6)
+     .text('% employed in software or engineering roles').style('font-size','.65rem').style('fill','#7A6E62')
+     .style('font-family',"'Source Sans 3',sans-serif");
+
+    fields.forEach(function(f){
+        var pct=TECH_OCC_PCT[f];
+        var cy=y(f)+y.bandwidth()/2;
+        var bh=y.bandwidth()*0.6;
+        gB.append('rect').attr('x',0).attr('y',cy-bh/2).attr('width',x(pct)).attr('height',bh)
+         .attr('fill',FC[f]).attr('opacity',0.75).attr('rx',2);
+        gB.append('text').attr('x',x(pct)+5).attr('y',cy).attr('dy','.35em')
+         .text(pct+'%').style('font-size','.72rem').style('fill',FC[f])
+         .style('font-weight','600').style('font-family',"'DM Sans',sans-serif");
+    });
+
+    gB.append('g').attr('transform','translate(0,'+iH+')')
+     .call(d3.axisBottom(x).ticks(5).tickFormat(function(d){return d+'%';})).call(ax);
+}
+
+// ─── CHART 3: Age stratification ─────────────────────────────────────
+var AGE_COLORS = ['#3D2B6E','#9B8EC4','#C4BAE0']; // dark→light purple for young→established
+
+function shadeRegion(g, x, y, iH, x1, x2, color){
+    g.append('rect').attr('x',x(x1)).attr('y',0).attr('width',x(x2)-x(x1)).attr('height',iH)
+     .attr('fill',color).attr('opacity',0.12);
+}
+
+function drawAge(step){
+    var highlight2024 = step==='a2'||step==='a3';
+    var Rpad = 16; // no end-of-line labels; rely on legend
+    var W=cw('age-svg'), H=ch(W), iW=W-M.l-Rpad, iH=H-M.t-M.b;
+    var svg=d3.select('#age-svg').attr('width',W).attr('height',H);
+    svg.selectAll('*').remove();
+    var g=svg.append('g').attr('transform','translate('+M.l+','+M.t+')');
+
+    var x=d3.scaleLinear().domain([2009,2024]).range([0,iW]);
+    var y=d3.scaleLinear().domain([0,9]).range([iH,0]);
+
+    // subtle gridlines
+    [3,6].forEach(function(v){
+        g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y(v)).attr('y2',y(v))
+         .attr('stroke','#E8DDD0').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+    });
+
+    // period shading
+    if(step==='a0') shadeRegion(g,x,y,iH,2009,2011,'#C0392B');
+    if(step==='a1') shadeRegion(g,x,y,iH,2019,2021,'#5B9BD5');
+    if(step==='a1b'||step==='a2'||step==='a3') shadeRegion(g,x,y,iH,2022,2024,'#7B68A6');
+
+    var line=d3.line().x(function(d){return x(d.y);}).y(function(d){return y(d.u);}).curve(d3.curveMonotoneX);
+
+    // draw oldest first so youngest is on top
+    var series=[
+        {d:CS_EST,   c:AGE_COLORS[2], lbl:'35–50'},
+        {d:CS_MID,   c:AGE_COLORS[1], lbl:'28–34'},
+        {d:CS_YOUNG, c:AGE_COLORS[0], lbl:'22–27'}
+    ];
+    series.forEach(function(s){
+        g.append('path').datum(s.d).attr('fill','none').attr('stroke',s.c).attr('stroke-width',2.5).attr('d',line);
+    });
+
+    // annotate 2024 endpoints only
+    series.forEach(function(s){
+        var last=s.d[s.d.length-1];
+        g.append('circle').attr('cx',x(last.y)).attr('cy',y(last.u)).attr('r',4).attr('fill',s.c);
+    });
+
+    // on highlight: draw vertical connectors from 2022→2024 for each line
+    if(highlight2024){
+        series.forEach(function(s){
+            var d22=s.d.find(function(r){return r.y===2022;});
+            var d24=s.d.find(function(r){return r.y===2024;});
+            if(!d22||!d24) return;
+            g.append('line')
+             .attr('x1',x(2022)+1).attr('x2',x(2022)+1)
+             .attr('y1',y(d22.u)).attr('y2',y(d24.u))
+             .attr('stroke',s.c).attr('stroke-width',2).attr('stroke-dasharray','2,2');
+        });
+    }
+
+    g.append('g').attr('transform','translate(0,'+iH+')').call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(6)).call(ax);
+    g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(function(d){return d+'%';})).call(ax);
+}
+
+// ─── SCROLLAMA ────────────────────────────────────────────────────────
+function activate(cid, sid){
+    document.querySelectorAll('#'+cid+' .step').forEach(function(el){
+        el.classList.toggle('is-active', el.getAttribute('data-step')===sid);
+    });
+}
+function scroller(cid, cb){
+    scrollama().setup({step:'#'+cid+' .step',offset:.5}).onStepEnter(function(r){
+        activate(cid, r.element.getAttribute('data-step'));
+        if(cb) cb(r.element.getAttribute('data-step'));
+    });
+}
+
+function initScrollers(){
+    scroller('s-unemp',function(s){
+        if(s==='u1') drawUnemp('peak');
+        else if(s==='u2') drawUnemp('spike');
+        else if(s==='u3') drawUnemp('nilf-peak');
+        else if(s==='u4') drawUnemp('nilf-drop');
+        else if(s==='u5') drawStatusBars();
+        else drawUnemp(null);
+    });
+    scroller('s-bubble',function(s){
+        if(s==='b4') drawTechBars();
+        else drawBubble(s);
+    });
+    scroller('s-age',function(s){ drawAge(s); });
+}
+
+// ─── INIT — fetch JSON data files then draw ────────────────────────────
+Promise.all([
+    fetch('data/cs_unemployment.json').then(function(r){return r.json();}),
+    fetch('data/bubble_2022.json').then(function(r){return r.json();}),
+    fetch('data/bubble_2024.json').then(function(r){return r.json();}),
+    fetch('data/tech_occ_pct.json').then(function(r){return r.json();}),
+    fetch('data/cs_age_unemployment.json').then(function(r){return r.json();})
+]).then(function(results){
+    CS_LINES    = results[0];
+    BUBBLE_2022 = results[1];
+    BUBBLE_2024 = results[2];
+    TECH_OCC_PCT = results[3];
+    var age     = results[4];
+    CS_YOUNG = age.young;
+    CS_MID   = age.mid;
+    CS_EST   = age.est;
+
+    drawUnemp(null);
+    drawBubble('b1');
+    drawAge(false);
+    initScrollers();
+}).catch(function(e){
+    console.error('Failed to load data:', e);
+});
+
+var t;
+window.addEventListener('resize',function(){
+    clearTimeout(t);
+    t=setTimeout(function(){drawUnemp(null);drawBubble('b1');drawAge(false);},150);
+});
+
+})();
+</script>
+</body>
+</html>

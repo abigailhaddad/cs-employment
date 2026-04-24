@@ -1,0 +1,27 @@
+[
+  {
+    "field": "Business",
+    "unemp": 1.7,
+    "n": 541858
+  },
+  {
+    "field": "Computer Science",
+    "unemp": 3.7,
+    "n": 365243
+  },
+  {
+    "field": "Engineering",
+    "unemp": 2.2,
+    "n": 580360
+  },
+  {
+    "field": "Humanities",
+    "unemp": 3.2,
+    "n": 1494770
+  },
+  {
+    "field": "Mathematics",
+    "unemp": 3.2,
+    "n": 86587
+  }
+]
