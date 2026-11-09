@@ -1,0 +1,7 @@
+# Exact versions used by .github/workflows/rebuild.yml (tested together on Python 3.13).
+# requirements.txt keeps the loose lower bounds for local use.
+ipumspy==0.8.2
+pandas==2.3.3
+numpy==2.5.4
+pyarrow==23.0.1
+PyYAML==6.0.3

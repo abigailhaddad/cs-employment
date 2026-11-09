@@ -43,6 +43,26 @@ Three steps run in sequence:
 3. **`export_web_data.py`** — reads the CSVs and parquet, builds the JSON
    files the HTML page fetches at runtime, and writes them to `web/data/`.
 
+## Rebuild on GitHub Actions
+
+`.github/workflows/rebuild.yml` (manual, "Run workflow") re-submits the IPUMS
+extract, regenerates `data/employment_rates.csv` and `web/data/*.json`, runs
+`scripts/check_outputs.py`, and opens a PR from a `regen/<run-id>` branch. It
+never pushes to the default branch and never commits raw microdata.
+
+- One-time setup: create a key at <https://account.ipums.org/api_keys> and add
+  it as the repository secret `IPUMS_API_KEY`. Settings > Actions > General >
+  "Allow GitHub Actions to create and approve pull requests" lets the workflow
+  open the PR itself; otherwise it pushes the branch and prints a compare link.
+- Expect 1 to 5 hours, almost all of it waiting in the IPUMS queue. If the job
+  times out, the extract number is printed in the run summary; re-run the
+  workflow with it in the `extract_number` input to resume.
+- The numbers written in `web/index.html` (prose and values hard-coded in its
+  script) are not regenerated. The PR body lists the new values to copy in.
+- Pinned versions for CI are in `requirements-ci.txt`.
+- Locally: `python scripts/resubmit_extract.py --dry-run` prints the extract
+  definition without a key.
+
 ## Layout
 
 ```
