@@ -64,8 +64,8 @@ Three steps run in sequence:
   degree (DEGFIELD > 0).
 - **Age buckets**: 22–27 (young), 28–34 (early career), 35–50 (established).
 - **Fields** (DEGFIELD codes): Computer Science (21), Engineering (24),
-  Mathematics/Statistics (37), Business (61), Humanities — English (33),
-  Liberal Arts (34), Philosophy (48), History (62).
+  Mathematics/Statistics (37), Business (62), Humanities — English (33),
+  Liberal Arts (34), Philosophy (48), History (64).
 - **Employment**: EMPSTAT 1 = employed, 2 = unemployed, 3 = not in labor
   force.
 - **2020**: skipped. The 2020 1-year ACS is experimental per Census Bureau
