@@ -12,8 +12,8 @@ field_codes:
   Computer Science: [21]
   Engineering: [24]
   Mathematics: [37]
-  Business: [61]
-  Humanities: [33, 34, 48, 62]  # English, Liberal Arts, Philosophy, History
+  Business: [62]
+  Humanities: [33, 34, 48, 64]  # English, Liberal Arts, Philosophy, History
 
 age_buckets:
   - {label: "22-27 (young)",        min: 22, max: 27}
