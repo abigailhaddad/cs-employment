@@ -6,6 +6,7 @@ import pandas as pd
 from config import TECH_OCC, BUBBLE_YEARS, TECH_OCC_YEARS
 from extract import DATA_DIR
 
+TECH_OCC_FIELDS = ["Computer Science", "Engineering", "Mathematics"]
 WEB_DATA_DIR = Path(__file__).parent / "web" / "data"
 WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -40,7 +41,8 @@ def main():
     ].copy()
     young_df["in_tech_occ"] = young_df["OCC2010"].isin(TECH_OCC)
     tech_pct = {}
-    for field, g in young_df.groupby("field"):
+    # Only fields whose shares were checked against the published page are emitted.
+    for field, g in young_df[young_df["field"].isin(TECH_OCC_FIELDS)].groupby("field"):
         w = g["PERWT"].values.astype(float)
         tech_pct[field] = round(100 * w[g["in_tech_occ"].values].sum() / w.sum(), 1) if w.sum() > 0 else 0
     write("tech_occ_pct", tech_pct)

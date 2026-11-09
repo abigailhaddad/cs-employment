@@ -1,8 +1,8 @@
 [
   {
     "field": "Business",
-    "unemp": 1.7,
-    "n": 541858
+    "unemp": 2.7,
+    "n": 1281740
   },
   {
     "field": "Computer Science",
@@ -16,8 +16,8 @@
   },
   {
     "field": "Humanities",
-    "unemp": 3.2,
-    "n": 1494770
+    "unemp": 6.3,
+    "n": 296571
   },
   {
     "field": "Mathematics",

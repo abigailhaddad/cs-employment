@@ -88,6 +88,11 @@ never pushes to the default branch and never commits raw microdata.
   Liberal Arts (34), Philosophy (48), History (64).
 - **Employment**: EMPSTAT 1 = employed, 2 = unemployed, 3 = not in labor
   force.
+- **Rates**: person-weighted (PERWT). `employed_pct`, `unemployed_pct`, and
+  `nilf_pct` are each a share of everyone in the cell and sum to 100, so
+  `unemployed_pct` is not the standard unemployment rate (unemployed divided
+  by employed plus unemployed). The page labels it as a share of all people
+  in the group.
 - **2020**: skipped. The 2020 1-year ACS is experimental per Census Bureau
   guidance and not comparable to other years.
 - **Cell minimum**: cells with fewer than 50 unweighted observations are

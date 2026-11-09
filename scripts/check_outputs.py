@@ -170,8 +170,9 @@ def main() -> None:
         if not (web / f"{name}.json").exists():
             fail(f"missing web/data/{name}.json")
     tech = json.loads((web / "tech_occ_pct.json").read_text())
-    if set(tech) != EXPECTED_FIELDS:
-        fail(f"tech_occ_pct fields {sorted(tech)}")
+    tech_expected = {"Computer Science", "Engineering", "Mathematics"}
+    if set(tech) != tech_expected:
+        fail(f"tech_occ_pct fields {sorted(tech)} != {sorted(tech_expected)}")
 
     text = build_summary(emp, web)
     if a.summary:
