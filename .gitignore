@@ -15,3 +15,6 @@ data/cps_analysis_ready.parquet
 
 # Local Netlify folder
 .netlify
+
+# Rebuild workflow scratch (summary for the PR body)
+.rebuild/
